@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Bell, CheckCircle, AlertCircle, Calendar, Package } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 const NotificationPanel = ({ notifications, onClose }) => {
   if (!notifications || notifications.length === 0) {
