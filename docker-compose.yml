@@ -1,0 +1,64 @@
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:latest
+    container_name: microgrow-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    restart: unless-stopped
+    networks:
+      - microgrow-network
+
+  # Backend Node.js API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: microgrow-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      MONGODB_URI: mongodb://root:example@mongo:27017/microgrow?authSource=admin
+      JWT_SECRET: your_jwt_secret_here_change_in_production
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - microgrow-network
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: microgrow-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://localhost:5000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - microgrow-network
+
+volumes:
+  mongo-data:
+
+networks:
+  microgrow-network:
+    driver: bridge
